@@ -3,27 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Lector de noticias con Fetch y JSON. Reto 5, Programación web del lado del cliente (UVEG).">
-  <title>Pulso · Lector de noticias</title>
+  <meta name="description" content="Infórmese de los Dineros: finanzas, tecnología y corporaciones. Reto 5, Programación web del lado del cliente (UVEG).">
+  <title>Infórmese de los Dineros</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- ===== Encabezado (cabecera de periódico) ===== -->
+  <!-- ===== Encabezado ===== -->
   <header class="cabecera">
     <div class="cabecera__franja">
-      <p class="cabecera__fecha" id="fecha-hoy"></p>
-      <div class="cabecera__acciones">
-        <p class="cabecera__estado" id="estado-actualizacion" aria-live="polite">Sin cargar</p>
-        <button type="button" class="boton boton--oscuro" id="btn-refrescar">
-          <span class="boton__icono" aria-hidden="true">↻</span> Refrescar
-        </button>
-      </div>
+      <p id="fecha-hoy"></p>
+      <p id="estado-actualizacion" aria-live="polite">Sin cargar</p>
     </div>
 
     <div class="cabecera__marca">
-      <h1 class="cabecera__titulo">Pulso</h1>
-      <p class="cabecera__lema">Lector de noticias · Fetch y JSON</p>
+      <h1 class="cabecera__titulo">Infórmese de los Dineros</h1>
+      <p class="cabecera__lema">Finanzas, tecnología y corporaciones internacionales</p>
     </div>
 
     <!-- Secciones: se generan desde JavaScript según la fuente elegida -->
@@ -35,42 +30,44 @@
   <!-- ===== Cuerpo principal ===== -->
   <main class="principal">
 
-    <!-- Controles: fuente, búsqueda, cantidad y actualización automática -->
-    <form class="controles" id="form-controles" autocomplete="off">
-      <div class="campo">
-        <label for="sel-fuente">Fuente</label>
-        <select id="sel-fuente">
-          <option value="hackernews">Hacker News · tecnología (sin clave)</option>
-          <option value="spaceflight">Spaceflight News · espacio (sin clave)</option>
-          <option value="gnews">GNews · México en español (requiere clave)</option>
-        </select>
+    <!-- Búsqueda y ajustes -->
+    <form class="controles" id="form-controles" autocomplete="off" role="search">
+      <div class="busqueda">
+        <label class="oculto" for="txt-busqueda">Buscar tema</label>
+        <input type="search" id="txt-busqueda" placeholder="Buscar: Nvidia, Banxico, Apple, bolsa…">
+        <button type="submit" class="enlace-boton">Buscar</button>
+        <button type="button" class="enlace-boton" id="btn-refrescar">
+          <span class="giro" aria-hidden="true">↻</span> Refrescar
+        </button>
       </div>
 
-      <div class="campo campo--crece">
-        <label for="txt-busqueda">Buscar tema</label>
-        <input type="search" id="txt-busqueda" placeholder="Ej. Nvidia, Jensen Huang, inteligencia artificial…">
-      </div>
-
-      <div class="campo">
-        <label for="sel-cantidad">Noticias</label>
-        <select id="sel-cantidad">
-          <option value="7">7</option>
-          <option value="10" selected>10</option>
-          <option value="13">13</option>
-        </select>
-      </div>
-
-      <div class="campo campo--clave" id="campo-clave" hidden>
-        <label for="txt-clave">Clave de GNews</label>
-        <input type="password" id="txt-clave" placeholder="Pega tu API key">
-      </div>
-
-      <button type="submit" class="boton boton--oscuro">Buscar</button>
-
-      <label class="interruptor">
-        <input type="checkbox" id="chk-auto">
-        <span>Actualizar cada 5 min</span>
-      </label>
+      <details class="ajustes">
+        <summary>Ajustes</summary>
+        <div class="ajustes__cuerpo">
+          <div class="campo">
+            <label for="sel-fuente">Fuente</label>
+            <select id="sel-fuente">
+              <option value="medios">Medios en español (sin clave)</option>
+              <option value="gnews">GNews · México (requiere clave)</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="sel-cantidad">Noticias</label>
+            <select id="sel-cantidad">
+              <option value="7">7</option>
+              <option value="11" selected>11</option>
+              <option value="15">15</option>
+            </select>
+          </div>
+          <div class="campo" id="campo-clave" hidden>
+            <label for="txt-clave">Clave de GNews</label>
+            <input type="password" id="txt-clave" placeholder="Pega tu API key">
+          </div>
+          <label class="casilla">
+            <input type="checkbox" id="chk-auto"> Actualizar cada 5 min
+          </label>
+        </div>
+      </details>
     </form>
 
     <!-- Área donde se muestran las noticias -->
@@ -81,7 +78,7 @@
       <div class="mensaje" id="mensaje" role="alert" hidden>
         <p class="mensaje__titulo" id="mensaje-titulo"></p>
         <p class="mensaje__texto" id="mensaje-texto"></p>
-        <button type="button" class="boton boton--oscuro" id="btn-reintentar">Reintentar</button>
+        <button type="button" class="enlace-boton" id="btn-reintentar">Reintentar</button>
       </div>
 
       <div class="rejilla" id="lista-noticias" aria-live="polite" aria-busy="false"></div>
@@ -92,38 +89,36 @@
   <dialog class="modal" id="modal-noticia" aria-labelledby="modal-titulo">
     <article class="modal__contenido">
       <button type="button" class="modal__cerrar" id="btn-cerrar-modal" aria-label="Cerrar">✕</button>
-      <p class="modal__seccion" id="modal-seccion"></p>
+      <p class="modal__medio" id="modal-medio"></p>
       <h2 class="modal__titulo" id="modal-titulo"></h2>
       <p class="modal__meta" id="modal-meta"></p>
       <img class="modal__imagen" id="modal-imagen" alt="">
       <p class="modal__resumen" id="modal-resumen"></p>
-      <a class="boton boton--oscuro" id="modal-enlace" target="_blank" rel="noopener noreferrer">
-        Leer la nota completa en el sitio original ↗
-      </a>
+      <a class="modal__enlace" id="modal-enlace" target="_blank" rel="noopener noreferrer"></a>
     </article>
   </dialog>
 
   <!-- ===== Pie ===== -->
   <footer class="pie">
-    <p class="pie__marca">Pulso</p>
+    <p>Solo se muestran notas publicadas en sitios con conexión segura (HTTPS).</p>
+    <p>Fuentes: El País, Expansión, Forbes México, El Financiero y Xataka, vía
+      <a href="https://rss2json.com/" target="_blank" rel="noopener">rss2json</a>; y
+      <a href="https://gnews.io/" target="_blank" rel="noopener">GNews</a>.</p>
     <p>Reto 5 · Programación web del lado del cliente · UVEG</p>
-    <p>Datos: <a href="https://hn.algolia.com/api" target="_blank" rel="noopener">HN Search API</a>,
-      <a href="https://spaceflightnewsapi.net/" target="_blank" rel="noopener">Spaceflight News API</a> y
-      <a href="https://gnews.io/" target="_blank" rel="noopener">GNews</a></p>
   </footer>
 
   <!-- Plantilla de nota: se clona desde JavaScript -->
-  <template id="plantilla-tarjeta">
+  <template id="plantilla-nota">
     <article class="nota">
-      <figure class="nota__media">
-        <img class="nota__imagen" alt="" loading="lazy">
-      </figure>
-      <div class="nota__cuerpo">
-        <p class="nota__seccion"></p>
+      <div class="nota__texto">
+        <p class="nota__medio"></p>
         <h3 class="nota__titulo"><button type="button" class="nota__enlace"></button></h3>
         <p class="nota__resumen"></p>
         <p class="nota__meta"></p>
       </div>
+      <figure class="nota__media">
+        <img class="nota__imagen" alt="" loading="lazy" referrerpolicy="no-referrer">
+      </figure>
     </article>
   </template>
 
